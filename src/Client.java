@@ -56,13 +56,27 @@ public class Client {
 
     }
 
+    private static int parsePortNumber(String number){
+        try{
+            return Integer.parseInt(number);
+        }catch (NumberFormatException e){
+            System.out.println("check if port number is valid");
+            return -1;
+        }
+    }
+
 
     public static void main(String []args) throws IOException {
-        try( Scanner scanner = new Scanner(System.in);
-             Socket socket = new Socket("localhost",1234);
+
+        String hostname = args[0];
+        int portnumber=parsePortNumber(args[1]);
+        String username = args[2];
+
+
+        try(
+             Socket socket = new Socket(hostname,portnumber);
         )
         {
-            String username = scanner.nextLine();
             Client client  = new Client(socket,username);
             client.startChatting();
         }

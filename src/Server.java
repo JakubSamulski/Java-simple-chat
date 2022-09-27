@@ -41,8 +41,23 @@ public class Server {
         }
     }
 
+    private static int parsePortNumber(String arg0){
+        try{
+            return Integer.parseInt(arg0);
+        }catch (NumberFormatException e){
+            System.out.println("check if port number is valid");
+            return -1;
+        }
+    }
+
     public static void main(String args []) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(1234);
+
+        int portNumber= parsePortNumber(args[0]);
+        if(portNumber==-1){
+            System.exit(0);
+        }
+
+        ServerSocket serverSocket = new ServerSocket(portNumber);
         Server server = new Server(serverSocket);
         server.startServer();
 
