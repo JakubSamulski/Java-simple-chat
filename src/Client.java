@@ -1,20 +1,19 @@
 import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class Client {
     private Socket clientSocket;
-    private BufferedReader input;
-    private PrintWriter serverOutput;
+    private BufferedReader userInput;
+    private PrintWriter streamToServer;
     private String username;
     private ServerListener serverListener;
 
     public Client(Socket socket, String username) throws IOException {
 
         try {
-            this.serverOutput = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()),true);
+            this.streamToServer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()),true);
             this.clientSocket =socket;
-            this.input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.userInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         }catch (IOException e){
             System.out.println("input/output error");
             closeResources();
@@ -22,18 +21,18 @@ public class Client {
         }
 
         this.username = username;
-        this.serverListener = new ServerListener(input, socket);
+        this.serverListener = new ServerListener(userInput, socket);
     }
 
     public void startChatting() throws IOException {
 
-        serverOutput.println(username);
-        Scanner scanner = new Scanner(System.in);
+        streamToServer.println(username);
+        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
 
         while (clientSocket.isConnected()){
-            String message = scanner.nextLine();
-            serverOutput.println(message);
+            String message = stdin.readLine();
+            streamToServer.println(message);
         }
         closeResources();
     }
@@ -43,11 +42,11 @@ public class Client {
             if(this.clientSocket!= null){
                 this.clientSocket.close();
             }
-            if(this.input != null){
-                this.input.close();
+            if(this.userInput != null){
+                this.userInput.close();
             }
-            if(this.serverOutput!= null){
-                this.serverOutput.close();
+            if(this.streamToServer != null){
+                this.streamToServer.close();
             }
         }
         catch (IOException e){

@@ -7,15 +7,15 @@ public class ClientHandler implements Runnable{
 
     public static ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
     private Socket clientSocket;
-    private PrintWriter output;
-    private BufferedReader input;
+    private PrintWriter streamToClients;
+    private BufferedReader streamFromClients;
     private String username;
 
     public ClientHandler(Socket clientSocket) throws IOException {
         this.clientSocket =clientSocket;
-        this.output = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()),true);
-        this.input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        this.username = input.readLine();
+        this.streamToClients = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()),true);
+        this.streamFromClients = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        this.username = streamFromClients.readLine();
         clientHandlers.add(this);
         broadcast(this.username+" has connected","server");
 
@@ -24,7 +24,7 @@ public class ClientHandler implements Runnable{
     public void broadcast(String message,String sender){
         for (ClientHandler clientHandler:clientHandlers){
             if(clientHandler!=this){
-                clientHandler.output.println(sender+"> "+message);
+                clientHandler.streamToClients.println(sender+"> "+message);
             }
         }
     }
@@ -36,7 +36,7 @@ public class ClientHandler implements Runnable{
         String message;
         while (clientSocket.isConnected()&&clientHandlers.contains(this)){
             try{
-                message = input.readLine();
+                message = streamFromClients.readLine();
                 broadcast(message,this.username);
             } catch (IOException e) {
                 System.out.println(username+" has disconected");
@@ -55,11 +55,11 @@ public class ClientHandler implements Runnable{
             if(this.clientSocket!= null){
                 this.clientSocket.close();
             }
-            if(this.input != null){
-                this.input.close();
+            if(this.streamFromClients != null){
+                this.streamFromClients.close();
             }
-            if(this.output!= null){
-                this.output.close();
+            if(this.streamToClients != null){
+                this.streamToClients.close();
             }
         }
         catch (IOException e){
